@@ -1,6 +1,8 @@
 use lib::image::Image;
 use std::f64;
+
 fn main() {
+    println!("Just producing a stupid image.");
 
     let mut image = Image::new(1000,1000);
 
@@ -11,7 +13,5 @@ fn main() {
         }
     }
 
-    let _ = image.write_ppm("image.ppm");
-
-
+    let _ = image.write_ppm("image1.ppm");
 }
