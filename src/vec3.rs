@@ -38,6 +38,8 @@ impl Vec3 {
         )
     }
 
+    /// Compute the unit vector (the vector of same direction and
+    /// length 1)
     pub fn unit_vector(self) -> Vec3 {
         self / self.length()
     }
