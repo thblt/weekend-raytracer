@@ -13,7 +13,7 @@ pub struct Matrix<T> {
 impl<T> Matrix<T> {
     pub fn to_index(&self, (x, y): (usize, usize)) -> usize {
         if !self.test_coords(x, y) {
-            panic!("Bad coords: {x},{y}");
+            panic!("Bad coords: {x},{y} (dimensions are {},{})", self.width, self.height);
         }
 
         y * self.width + x
