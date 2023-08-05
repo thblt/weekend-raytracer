@@ -1,6 +1,7 @@
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
+#[derive(PartialEq,PartialOrd,Copy,Clone)]
 pub struct Hit {
     pub p: Point3,
     pub normal: Vec3,
@@ -22,6 +23,20 @@ pub trait Hittable {
 pub struct Sphere {
     center: Point3,
     radius: f64,
+}
+
+impl Sphere {
+    pub fn new(center: Point3, radius: f64) -> Sphere {
+        Sphere {center, radius }
+    }
+}
+
+impl<T: Hittable> Hittable for Vec<T> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
+        self.iter()
+            .filter_map(|x| T::hit(x, ray, t_min, t_max))
+            .min_by(|a,b| a.t.partial_cmp(&b.t).expect("Hit.t should compare."))
+    }
 }
 
 impl Hittable for Sphere {
@@ -49,6 +64,9 @@ impl Hittable for Sphere {
 
         let point = ray.at(root);
 
+        // @FIXME This is quite ugly.  We can probably move
+        // everything, incl the call to set_face_normal, into
+        // a Hit::new() constructor and avoid the `let mut`.
         let mut ret = Hit {
             t: root,
             p: point,
