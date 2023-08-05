@@ -5,6 +5,14 @@ pub struct Hit {
     pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
+    front_face: bool,
+}
+
+impl Hit {
+    fn set_face_normal(&mut self, r: &Ray, outward_normal: &Vec3) {
+        self.front_face = r.direction.dot(*outward_normal) < 0.0;
+        self.normal = if self.front_face { *outward_normal } else {-*outward_normal} ;
+    }
 }
 
 pub trait Hittable {
@@ -41,10 +49,14 @@ impl Hittable for Sphere {
 
         let point = ray.at(root);
 
-        Some(Hit {
+        let mut ret = Hit {
             t: root,
             p: point,
             normal: (point - self.center) / self.radius,
-        })
+            front_face: true,
+        };
+        let outward_normal = (point - self.center) / self.radius;
+        ret.set_face_normal(ray, &outward_normal);
+        Some(ret)
     }
 }
