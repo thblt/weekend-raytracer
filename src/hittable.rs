@@ -6,8 +6,8 @@ pub struct Hit {
     pub p: Point3,
     pub normal: Vec3,
     pub t: f64,
-    front_face: bool,
-}
+    pub front_face: bool,
+    }
 
 impl Hit {
     fn set_face_normal(&mut self, r: &Ray, outward_normal: &Vec3) {
