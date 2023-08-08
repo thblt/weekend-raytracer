@@ -27,6 +27,10 @@ path = "src/main5.rs"
 name = "main6"
 path = "src/main6.rs"
 
+[[bin]]
+name = "main7"
+path = "src/main7.rs"
+
 [lib]
 name = "lib"
 path = "src/lib.rs"
