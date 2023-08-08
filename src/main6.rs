@@ -1,12 +1,12 @@
 use lib::*;
 use std::f64;
 
+/// Compute the color of ray given world.
 fn ray_color(ray: &Ray, world: &Vec<Sphere>) -> Color {
     let white = Color::new(1.0, 1.0, 1.0);
-    // let grad_start = Color::new(0.3, 0.3, 0.3);
     let grad_end = Color::new(0.5, 0.7, 1.0);
 
-    if let Some(hit) = world.hit(ray, 0.0, f64::MAX) {
+    if let Some(hit) = world.hit(ray, Interval::positive_or_null()) {
         0.5 * (hit.normal + white)
     } else {
         let unit_direction = ray.direction.unit_vector();
@@ -15,6 +15,7 @@ fn ray_color(ray: &Ray, world: &Vec<Sphere>) -> Color {
     }
 }
 
+/// Usually print hello world
 fn main() {
     println!("A world of Sphere.");
 

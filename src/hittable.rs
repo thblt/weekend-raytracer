@@ -1,3 +1,4 @@
+use crate::Interval;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
@@ -17,7 +18,7 @@ impl Hit {
 }
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit>;
+    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<Hit>;
 }
 
 pub struct Sphere {
@@ -32,15 +33,15 @@ impl Sphere {
 }
 
 impl<T: Hittable> Hittable for Vec<T> {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
+    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<Hit> {
         self.iter()
-            .filter_map(|x| T::hit(x, ray, t_min, t_max))
+            .filter_map(|x| T::hit(x, ray, ray_t))
             .min_by(|a,b| a.t.partial_cmp(&b.t).expect("Hit.t should compare."))
     }
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
+    fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<Hit> {
         let oc = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let half_b = oc.dot(ray.direction);
@@ -55,9 +56,9 @@ impl Hittable for Sphere {
         // Find the nearest root that lies in the acceptable range.
         let mut root = (-half_b - sqrtd) / a;
 
-        if root < t_min || t_max < root {
+        if !ray_t.surrounds(root) {
             root = (-half_b + sqrtd) / a;
-            if root < t_min || t_max < root {
+            if !ray_t.surrounds(root) {
                 return None;
             }
         }
