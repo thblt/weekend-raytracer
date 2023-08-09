@@ -90,7 +90,7 @@ impl Camera {
         let white = Color::new(1.0, 1.0, 1.0);
         let grad_end = Color::new(0.5, 0.7, 1.0);
 
-        if let Some(hit) = world.hit(ray, Interval::positive_or_null()) {
+        if let Some(hit) = world.hit(ray, Interval::new(0.001, f64::MAX)) {
             let direction = Vec3::random_on_hemisphere(&hit.normal);
             0.5 * self.ray_color(&Ray::new(hit.p, direction), world, depth - 1)
         } else {
