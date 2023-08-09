@@ -71,6 +71,7 @@ impl Camera {
             }
         }
         image.normalize(self.samples_per_pixel);
+        // image.linear_to_gamma();
         image
     }
 

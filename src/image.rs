@@ -17,6 +17,14 @@ impl Image {
         }
     }
 
+    pub fn linear_to_gamma(&mut self) {
+        for element in self.vec.iter_mut() {
+            element.x = element.x.sqrt();
+            element.y = element.y.sqrt();
+            element.z = element.z.sqrt();
+        }
+    }
+
     /// Write this Matrix as a PPM image path.
     pub fn write_ppm(self, path: &str) -> std::io::Result<()> {
         let mut writer = BufWriter::new(File::create(path)?);
