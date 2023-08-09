@@ -7,6 +7,17 @@ use std::io::Write;
 pub type Image = Matrix<Color>;
 
 impl Image {
+    pub fn normalize(&mut self, samples_per_pixel: usize) {
+
+        let scale = 1.0 / samples_per_pixel as f64;
+        for element in self.vec.iter_mut() {
+            // TODO *=
+            element.x *= scale;
+            element.y *= scale;
+            element.z *= scale;
+        }
+    }
+
     /// Write this Matrix as a PPM image path.
     pub fn write_ppm(self, path: &str) -> std::io::Result<()> {
         let mut writer = BufWriter::new(File::create(path)?);

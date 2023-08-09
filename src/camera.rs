@@ -1,4 +1,5 @@
 use crate::{Color, Hittable, Image, Interval, Point3, Ray, Vec3};
+use rand::prelude::*;
 
 pub struct Camera {
     // /// Ratio of image width over height
@@ -7,6 +8,8 @@ pub struct Camera {
     // initalizes the class, so we don't need this.
     /// Rendered image width in pixel count
     image_width: usize,
+    // Count of random samples for each pixel
+    samples_per_pixel: usize,
     /// Rendered image height
     image_height: usize,
     /// Camera center
@@ -20,7 +23,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(image_width: usize, aspect_ratio: f64) -> Self {
+    pub fn new(image_width: usize, aspect_ratio: f64, samples_per_pixel: usize) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as usize;
 
         // Camera
@@ -42,6 +45,7 @@ impl Camera {
         Camera {
             image_width,
             image_height,
+            samples_per_pixel,
             center,
             pixel00_loc: viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v),
             pixel_delta_u,
@@ -54,15 +58,24 @@ impl Camera {
 
         for j in 0..self.image_height {
             for i in 0..self.image_width {
-                let pixel_center =
-                    self.pixel00_loc + (i as f64 * self.pixel_delta_u) + (j as f64 * self.pixel_delta_v);
-                let ray_direction = pixel_center - self.center;
-                let ray = Ray::new(self.center, ray_direction);
-                let pixel_color = Camera::ray_color(&ray, world);
+                let mut pixel_color = Vec3::default();
+                for _ in 0..self.samples_per_pixel {
+                    let ray = self.get_ray(i,j);
+                    pixel_color += Camera::ray_color(&ray, world);
+                }
                 image[(i, j)] = pixel_color
             }
         }
+        image.normalize(self.samples_per_pixel);
         image
+    }
+
+    fn get_ray(&self, i: usize, j: usize) -> Ray {
+        let pixel_center =
+            self.pixel00_loc + (i as f64 * self.pixel_delta_u) + (j as f64 * self.pixel_delta_v);
+        let pixel_sample = pixel_center + self.pixel_sample_square();
+        let ray_direction = pixel_sample - self.center;
+        Ray::new(self.center, ray_direction)
     }
 
     fn ray_color<T: Hittable>(ray: &Ray, world: &T) -> Color {
@@ -77,4 +90,20 @@ impl Camera {
             (1.0 - t) * white + t * grad_end
         }
     }
+
+    fn pixel_sample_square(&self) -> Vec3 {
+        let mut rng = rand::thread_rng();
+
+        let px: f64 = -0.5 + rng.gen::<f64>();
+        let py: f64 = -0.5 + rng.gen::<f64>();
+        (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
+    }
+
+
+}
+
+#[test]
+fn aspect_ratio_test() {
+    let cam = Camera::new(1000, 16.0/9.0);
+    assert!(cam.image_height == 562);
 }
