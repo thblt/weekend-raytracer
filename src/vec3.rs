@@ -16,6 +16,10 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
+    pub const fn zero() -> Vec3 {
+        Self::new(0.0, 0.0, 0.0)
+    }
+
     pub fn length(self) -> f64 {
         self.length_squared().sqrt()
     }
@@ -47,7 +51,7 @@ impl Vec3 {
 
 impl Default for Vec3 {
     fn default() -> Self {
-        Self::new(0.0, 0.0, 0.0)
+        Self::zero()
     }
 }
 
