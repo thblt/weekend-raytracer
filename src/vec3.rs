@@ -1,3 +1,4 @@
+use rand::prelude::*;
 use std::f64;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
@@ -18,6 +19,43 @@ impl Vec3 {
 
     pub const fn zero() -> Vec3 {
         Self::new(0.0, 0.0, 0.0)
+    }
+
+    pub fn random() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3::new(rng.gen(), rng.gen(), rng.gen())
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3::new(
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let ret = Self::random_range(-1.0, 1.0);
+            if ret.length_squared() < 1.0 {
+                return ret;
+            }
+        }
+    }
+
+    pub fn random_unit_vector() -> Vec3 {
+        Self::random_in_unit_sphere().unit_vector()
+    }
+
+    pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
+        let on_unit_sphere = Self::random_unit_vector();
+        if on_unit_sphere.dot(*normal) > 0.0 {
+            // In the same hemisphere as the normal
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
     }
 
     pub fn length(self) -> f64 {

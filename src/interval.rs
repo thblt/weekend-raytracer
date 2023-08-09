@@ -1,4 +1,5 @@
 #[derive(PartialEq, PartialOrd, Copy, Clone)]
+/// @FIXME We'r reimplementing Rust's Range
 pub struct Interval {
     min: f64,
     max: f64,

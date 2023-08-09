@@ -61,7 +61,7 @@ impl Camera {
                 let mut pixel_color = Vec3::default();
                 for _ in 0..self.samples_per_pixel {
                     let ray = self.get_ray(i,j);
-                    pixel_color += Camera::ray_color(&ray, world);
+                    pixel_color += self.ray_color(&ray, world);
                 }
                 image[(i, j)] = pixel_color
             }
@@ -78,12 +78,13 @@ impl Camera {
         Ray::new(self.center, ray_direction)
     }
 
-    fn ray_color<T: Hittable>(ray: &Ray, world: &T) -> Color {
+    fn ray_color<T: Hittable>(&self, ray: &Ray, world: &T) -> Color {
         let white = Color::new(1.0, 1.0, 1.0);
         let grad_end = Color::new(0.5, 0.7, 1.0);
 
         if let Some(hit) = world.hit(ray, Interval::positive_or_null()) {
-            0.5 * (hit.normal + white)
+            let direction = Vec3::random_on_hemisphere(&hit.normal);
+            0.5 * self.ray_color(&Ray::new(hit.p, direction), world)
         } else {
             let unit_direction = ray.direction.unit_vector();
             let t = 0.5 * (unit_direction.y + 1.0);
