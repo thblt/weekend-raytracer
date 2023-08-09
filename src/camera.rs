@@ -91,7 +91,10 @@ impl Camera {
         let grad_end = Color::new(0.5, 0.7, 1.0);
 
         if let Some(hit) = world.hit(ray, Interval::new(0.001, f64::MAX)) {
-            let direction = Vec3::random_on_hemisphere(&hit.normal);
+            // Naive reflection:
+            // let direction = Vec3::random_on_hemisphere(&hit.normal);
+            // True Lambertian:
+            let direction = hit.normal + Vec3::random_unit_vector();
             0.5 * self.ray_color(&Ray::new(hit.p, direction), world, depth - 1)
         } else {
             let unit_direction = ray.direction.unit_vector();
