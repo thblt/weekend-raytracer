@@ -2,14 +2,12 @@ use crate::{Color, Hittable, Image, Interval, Point3, Ray, Vec3};
 use rand::prelude::*;
 
 pub struct Camera {
-    // /// Ratio of image width over height
-    // aspect_ratio: f64,
-    // ^ We don't initialize the struct the same way the book
-    // initalizes the class, so we don't need this.
     /// Rendered image width in pixel count
     image_width: usize,
-    // Count of random samples for each pixel
+    /// Count of random samples for each pixel
     samples_per_pixel: usize,
+    /// Maximum number of ray bounces into scene
+    max_depth: usize,
     /// Rendered image height
     image_height: usize,
     /// Camera center
@@ -23,7 +21,12 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(image_width: usize, aspect_ratio: f64, samples_per_pixel: usize) -> Self {
+    pub fn new(
+        image_width: usize,
+        aspect_ratio: f64,
+        samples_per_pixel: usize,
+        max_depth: usize,
+    ) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as usize;
 
         // Camera
@@ -46,6 +49,7 @@ impl Camera {
             image_width,
             image_height,
             samples_per_pixel,
+            max_depth,
             center,
             pixel00_loc: viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v),
             pixel_delta_u,
@@ -60,8 +64,8 @@ impl Camera {
             for i in 0..self.image_width {
                 let mut pixel_color = Vec3::default();
                 for _ in 0..self.samples_per_pixel {
-                    let ray = self.get_ray(i,j);
-                    pixel_color += self.ray_color(&ray, world);
+                    let ray = self.get_ray(i, j);
+                    pixel_color += self.ray_color(&ray, world, self.max_depth);
                 }
                 image[(i, j)] = pixel_color
             }
@@ -78,13 +82,17 @@ impl Camera {
         Ray::new(self.center, ray_direction)
     }
 
-    fn ray_color<T: Hittable>(&self, ray: &Ray, world: &T) -> Color {
+    fn ray_color<T: Hittable>(&self, ray: &Ray, world: &T, depth: usize) -> Color {
+        if depth <= 0 {
+            return Color::zero();
+        }
+
         let white = Color::new(1.0, 1.0, 1.0);
         let grad_end = Color::new(0.5, 0.7, 1.0);
 
         if let Some(hit) = world.hit(ray, Interval::positive_or_null()) {
             let direction = Vec3::random_on_hemisphere(&hit.normal);
-            0.5 * self.ray_color(&Ray::new(hit.p, direction), world)
+            0.5 * self.ray_color(&Ray::new(hit.p, direction), world, depth - 1)
         } else {
             let unit_direction = ray.direction.unit_vector();
             let t = 0.5 * (unit_direction.y + 1.0);
@@ -99,12 +107,10 @@ impl Camera {
         let py: f64 = -0.5 + rng.gen::<f64>();
         (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
     }
-
-
 }
 
 #[test]
 fn aspect_ratio_test() {
-    let cam = Camera::new(1000, 16.0/9.0);
+    let cam = Camera::new(1000, 16.0 / 9.0);
     assert!(cam.image_height == 562);
 }
